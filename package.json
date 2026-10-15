@@ -1,6 +1,6 @@
 {
   "name": "gitflow-actions-demo",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Demo app for Git Flow + GitHub Actions release automation",
   "main": "src/calculator.js",
   "scripts": {
