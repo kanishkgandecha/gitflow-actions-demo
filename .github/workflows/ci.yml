@@ -1,0 +1,45 @@
+name: CI - Validate Code
+ 
+on:
+  push:
+    branches: [develop, 'feature/**', 'release/**', 'hotfix/**']
+  pull_request:
+    branches: [develop, main]
+ 
+jobs:
+  branch-name-check:
+    name: Validate branch name
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Git Flow naming convention
+        env:
+          BRANCH: ${{ github.head_ref || github.ref_name }}
+        run: |
+          echo "Branch: $BRANCH"
+          if [[ "$BRANCH" =~ ^(main|develop)$ ]] || \
+             [[ "$BRANCH" =~ ^feature/[a-z0-9._-]+$ ]] || \
+             [[ "$BRANCH" =~ ^(release|hotfix)/[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Branch name follows Git Flow"
+          else
+            echo "::error::Invalid branch name. Use feature/<name>, release/X.Y.Z or hotfix/X.Y.Z"
+            exit 1
+          fi
+ 
+  build-and-test:
+    name: Build and test
+    runs-on: ubuntu-latest
+    needs: branch-name-check
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+ 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+ 
+      - name: Lint (syntax check)
+        run: npm run lint
+ 
+      - name: Run unit tests
+        run: npm test
